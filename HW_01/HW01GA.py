@@ -1,4 +1,3 @@
-
 import random
 import copy
 import math
@@ -7,8 +6,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-
-basefitness = 99
 savedDNA = []
 mr = [0.0, 0.005, 0.01, 0.02, 0.03, 0.05, 0.1, 0.15, 0.2, 0.3]
 for i in range(0,20):
@@ -16,16 +13,12 @@ for i in range(0,20):
         savedDNA.append([])
         savedDNA[i].append(random.uniform(-10,10))
 
-
 class creature:
-
     length = 10
     def __init__(self, mr, i):
         self.fitness = 0
         self.DNA = []
-        self.mutRate = mr # means 5%
-        # for i in range(0,self.length):
-        #     self.DNA.append(random.uniform(-10,10))
+        self.mutRate = mr
         self.DNA = copy.deepcopy(savedDNA[i])
         self.calcFitness()
 
@@ -34,11 +27,6 @@ class creature:
         for i in range(0,self.length):
             print("%0.2f" % self.DNA[i], end = " ")
         print("  %0.2f" % self.fitness)
-
-    def writeCreature(self):
-    #     # self.writer.writerow([self.fitness])
-    #     # next(self.writer)
-        return self.fitness
 
     def calcFitness(self):
         self.fitness = 0.0
@@ -50,13 +38,12 @@ class creature:
         self.fitness = 418.9829 * self.length * tot
 
     def mutate(self):
-        #mutRate = self.DNA[0]
         for i in range(0,self.length):
-            if(random.randrange(0,100) < self.mutRate):
+            if(random.randrange(0,100) < self.mutRate * 100):
                 self.DNA[i] += random.uniform(-2,2)
 
     def crossover(self,other,crossoverVal):
-        #mutation from class
+        # crossover from class
         if(crossoverVal == 0):
             for i in range(0,self.length):
                 if(random.randrange(0,100) < 50):
@@ -70,7 +57,6 @@ class creature:
                 temp = self.DNA[i]
                 self.DNA[i] = other.DNA[i]
                 other.DNA[i] = temp
-
         # crossover picking a random split point then swapping x..y of the data
         elif (crossoverVal == 2):
             startlen = random.randrange(0,self.length)
@@ -79,7 +65,6 @@ class creature:
                 temp = self.DNA[i]
                 self.DNA[i] = other.DNA[i]
                 other.DNA[i] = temp
-
         # crossover switching every other value
         elif (crossoverVal == 3):
             for i in range(0,self.length):
@@ -87,7 +72,6 @@ class creature:
                     temp = self.DNA[i]
                     self.DNA[i] = other.DNA[i]
                     other.DNA[i] = temp
-
         # crossover switching every 5th value
         elif (crossoverVal == 4):
             for i in range(0,self.length):
@@ -96,15 +80,8 @@ class creature:
                     self.DNA[i] = other.DNA[i]
                     other.DNA[i] = temp
 
-        # crossover
-        elif (crossoverVal == 5):
-            x = 0
-
-
-
 class population:
     popSize = 20
-
     resultsFile =  open('results.csv', 'w', newline = '')
     writer = csv.writer(resultsFile, delimiter=',', quotechar='|',
      quoting = csv.QUOTE_MINIMAL)
@@ -118,12 +95,10 @@ class population:
             self.pop.append(creature(mr,i))
 
     def printPop(self):
-        # self.writer.writerows(self.pop)
         for i in range(0,self.popSize):
             self.pop[i].printCreature()
 
     def writePop(self):
-        # for i in range(0,self.popSize):
         l = []
         for i in range(0,self.popSize):
             l.append(self.pop[i].fitness)
@@ -143,14 +118,9 @@ class population:
         self.writer.writerows(flcsv)
         self.meansList = copy.deepcopy(fl)
 
-
     def plotPop(self, col, alp, mut, crs ):
         x = []
-        # for i in range(0,40):
-        #     x.apped
-        # plt.plot(x,y,c=c)
         plt.plot(self.meansList, color = col, alpha = alp, label = "mutation: %d crossover: %d" % (mut, crs))
-
 
     def selectParent(self):
         winner = random.randrange(0,self.popSize)
@@ -174,14 +144,13 @@ class population:
                 winningFitness = tempFit
         return winner
 
+    # unmodified from class version, with the exception of passing through crossover number
     def iterate(self, cross):
         # find a good individual
         p = self.selectParent()
         p2 = self.selectParent()
         while(p == p2):
             p2 = self.selectParent()
-        #print(p, end = " ")
-        #self.pop[p].printCreature()
         # find a poor individual
         l = self.selectLoser()
         while(l == p or l == p2):
@@ -200,33 +169,32 @@ class population:
         # recalculate fitness of offspring
         self.pop[l].calcFitness()
         self.pop[l2].calcFitness()
-        #self.pop[p].printCreature()
-        #self.pop[l].printCreature()
 
-
+# MAIN FUNCTION
+#
+    #  colors for graphing (only the first 5 are used when mapping crossover to color)
 cols = ['black', 'red', 'green', 'blue', 'yellow', 'orange', 'purple', 'aqua', 'tan', 'navy']
 for mutNo in range(0,len(mr)):
     for cross in range(0,5):
         p = population(mr[mutNo])
         p.printPop()
         p.fitnessListCSV.append([])
-        # p.writePop()
         for i in range(0,40):
             p.iterate(cross)
             p.writePop()
-
-        print("")
-        print("")
+        print("\n")
         p.printPop()
         p.writePopToCSV(mutNo, cross)
 
+        # figure 1-1, 1-2
+        # map color to crossover, alpha (lightness) to mutation number
         col= cols[cross]
         alp = mutNo/15 + 0.15
-
-        col = cols[mutNo]
-        alp = cross/6 + 0.15
+        # uncomment for alternate graph (figure 2-1, 2-2)
+        # map color to mutation number, alpha (lightness) to crossover
+        # col = cols[mutNo]
+        # alp = cross/6 + 0.15
         p.plotPop(col, alp, mutNo, cross)
 p.resultsFile.close()
 plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 plt.show()
-    # print(p.fitnessList)
