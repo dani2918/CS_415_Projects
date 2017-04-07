@@ -50,8 +50,12 @@ class creature:
     # fitness += 1 foreach word found
     def calcFitness(self):
         self.fitness = 0
+        # take each letter in string as starting letter
         for i in range(0,self.length):
+            # look at potential words of length 2 to end of sting
             for j in range(i+2,self.length):
+                # Check slices against English dictionary,
+                # Add 1 to fitness we find an English word
                 if dic.check(self.DNA[i:j]):
                     self.fitness +=1
 
@@ -61,7 +65,22 @@ class creature:
         listSelf = list(self.DNA)
         for i in range(0,self.length):
             if(random.randrange(0,100) < self.mutRate):
-                listSelf[i] = random.choice(list(scoringMatrix.aminoDictionary.keys()))
+                randNum = random.randrange(0,10)
+                col = scoringMatrix.aminoDictionary.get(self.DNA[i])
+                found = False
+                # if another amino has a score ≥ a rand between 0,10
+                # mutate to that amino
+                for j in range(0, len(scoringMatrix.blosum50[col])):
+                    if(scoringMatrix.blosum50[j][col] >= randNum):
+                        # print("j is", j)
+                        for k, v in scoringMatrix.aminoDictionary.items():
+                            if(j == v):
+                                listSelf[i] = k
+                                found = True
+                        break
+                # safeguard in case no score was founnd
+                if(not found):
+                    listSelf[i] = random.choice(list(scoringMatrix.aminoDictionary.keys()))
         self.DNA = ''.join(listSelf)
 
     def crossover(self,other):
@@ -164,9 +183,8 @@ p.pop[best].writeStartEnd()
 
 maxIt = 1000
 for i in range(0,maxIt):
-    # Debug to see how far along we are
-    # if(i % 100 == 0):
-    #     print(i)
+    if(i % 100 == 0):
+        print(i) # Debug to see how far along we are
     p.iterate(i)
 print("")
 print("")

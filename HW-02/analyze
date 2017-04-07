@@ -11,22 +11,27 @@ firstDat = ffirst.read().splitlines()
 # Randomly reorder
 random.shuffle(dat)
 scoreArr = []
-# get original sequence to compare all against
+
+
 originalSeq = firstDat[0]
-# print(originalSeq)
+print(originalSeq)
+
 
 # Code from lecture
 # Init score, direction matrix
 scorematrix = [[0] * (len(originalSeq)+1) for _ in range(len(dat[0])+1)]
 directionmatrix = [[8] * (len(originalSeq)+1) for _ in range(len(dat[0])+1)]
+
 savedScoreMat = copy.deepcopy(scorematrix)
 savedDirectionMat = copy.deepcopy(directionmatrix)
+
 for i in range(0,len(originalSeq)+1):
     scorematrix[0][i] = -8*i
     directionmatrix[0][i]  = 1
 for i in range(0,len(dat[0])+1):
     scorematrix[i][0] = -8*i
     directionmatrix[i][0] = 0
+
 
 # calculate scores for all sequences
 for k in range(len(dat)):
@@ -48,33 +53,71 @@ for k in range(len(dat)):
     y = len(dat[k])
     # print("Score = ",scorematrix[y][x])
     scoreArr.append([scorematrix[y][x], dat[k]])
+    # alignedseq1 = []
+    # alignedseq2 = []
+    # while(x != 0 or y != 0):
+    #     if(directionmatrix[y][x] == 2): # diagonal
+    #         x = x - 1   # x -= 1 or x--
+    #         y = y - 1
+    #         alignedseq1.append(originalSeq[x])
+    #         alignedseq2.append(dat[k][y])
+    #         # if(originalSeq[x] == dat[k][y]):
+    #             # print(originalSeq[x], originalSeq[x], dat[k][y],end = " ")
+    #         # elif(scorematrix[y][x] < 0):
+    #             # print(originalSeq[x], "-", dat[k][y], end = " ")
+    #         # else:
+    #             # print(originalSeq[x], "+", dat[k][y], end = " ")
+    #         # if(originalSeq[x] == dat[k][y] == 'e'):
+    #         #     print("important info", end = " ")
+    #         # print()
+    #     if(directionmatrix[y][x] == 0): # vertical
+    #         y = y - 1
+    #         alignedseq1.append('_')
+    #         alignedseq2.append(dat[k][y])
+    #         # print("_", " ", dat[k][y])
+    #     if(directionmatrix[y][x] == 1): # horizontal
+    #         x = x - 1
+    #         alignedseq1.append(originalSeq[x])
+    #         alignedseq2.append('_')
+            # print(originalSeq[x], " ", "_")
 
-    #restore score, direction matrices
+
+    # print(alignedseq1)
+    # print(alignedseq2)
+    # alignedseq1.reverse()
+    # alignedseq2.reverse()
+    # print(''.join(alignedseq1))
+    # print(''.join(alignedseq2))
+
+
     scorematrix = copy.deepcopy(savedScoreMat)
     directionmatrix = copy.deepcopy(savedDirectionMat)
 
-# order array based on decending alignment scores
+
+# print(scoreArr)
 npScoreArr = np.array(scoreArr)
 npScoreArr = npScoreArr[np.argsort(npScoreArr[:,0])]
 npScoreArr = npScoreArr[::-1]
 
-# Compare against original generation order
+print(npScoreArr)
+
 for i in range(len(npScoreArr)):
     npScoreArr[i][0] = i
+
+print(npScoreArr)
+
+
+
+scoredArray = npScoreArr[1]
 fscored = open('data.txt','r')
 finalDat = fscored.read().splitlines()
 finalDat = np.array(finalDat)
-dist = 0
-possibleDist = []
-for i in range(len(npScoreArr)):
-    for j in range(len(npScoreArr)):
-        if(npScoreArr[i][1] == finalDat[j]):
-            possibleDist.append(abs(i-j))
-    # Sum deviations from expected location
-    dist += min(possibleDist)
-    possibleDist = []
-# print mean of deviations
-print(dist/len(npScoreArr))
+
+for i in range(len(scoredArr)):
+    for j in range(len(scoredArray)):
+        if(scoredArray[i] == finalDat[j]):
+            print("TRUE")
+
 
 fscored.close()
 f.close()
